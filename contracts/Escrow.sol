@@ -36,7 +36,7 @@ contract Escrow {
     /**
     * Mapping for control limit call based on an action
     **/
-    mapping(string => VoteCount) voteCountCallMapping;
+    mapping(string => VoteCount) public voteCountCallMapping;
 
 
     event EscrowLocked();
@@ -78,6 +78,7 @@ contract Escrow {
 	}
 
     modifier onlyValidator() {
+        //TODO : make the condition right.
     	require(msg.sender == validators[0], "User not authorised.");
     	_;
 	}
@@ -197,11 +198,22 @@ contract Escrow {
         onlyValidator
         inState(State.Disputed)
         callToAction('refund')
-        returns (bool){
+        returns (bool)
+    {
 
         emit Finalized(receiver,address(this).balance);
         creator.transfer(address(this).balance);
         state = State.Inactive;
         return true;
+    }
+    /**
+    * Returns the current stte of the escrow
+    */
+    function getState()
+        internal
+        view
+        returns(State)
+    {
+        return(state);
     }
 }
