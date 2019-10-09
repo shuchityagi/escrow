@@ -4,31 +4,24 @@ contract Escrow {
 
     /** Address of the creator of the Escrow who is responsible for funding it. */
     address payable public creator;
-    
     /** Address of the receiving party */
     address payable public receiver;
-
     /** Addresses of the validators involved */
     address[] public validators;
-
     /** The timestamp after which the escrow will expire*/
     uint public deadline;
-
     /** The amount of funds locked in the escrow*/
     uint public amountLocked;
-
     /** Minimum quorum required to reach a decision in case of a dispute*/
     uint public minimumVotesRequired;
-
     /** Maximum number of validators allowed */
     uint private maxValidatorsAllowed = 5;
-
-    /** 
+    /**
     * The escrow can in the following states
     * 1. Created : Default state when the contract is created.
     * 2. Locked : Once the receiver is satified with the terms of the escorw, they can choose to lock it.
     * 3. Inactive : The esscrow is rendered inactive once the funds are moved out of it (refund or withdraw).
-    * 4. Disputed : In case of a dispute, either of the party can choose to move the escrow in this state to 
+    * 4. Disputed : In case of a dispute, either of the party can choose to move the escrow in this state to
     *    let the validators in.
     */
     enum State { Created, Locked, Inactive, Disputed }
@@ -54,7 +47,9 @@ contract Escrow {
     /**
     * Payable constructor to set to state variables.
     */
-    constructor(address payable _creator, address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline) public payable 
+    constructor(address payable _creator, address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline)
+        public
+        payable
     {
             require((_validators.length <= maxValidatorsAllowed) && (_validators.length > 0), "Invalid validator quorum.");
             require(_minimumVotesRequired <= maxValidatorsAllowed,"Minimum votes required exceeds the total number of validators.");
@@ -178,7 +173,13 @@ contract Escrow {
     * Withdraw payout
     * only if minimum defined validators confirmed process
     */
-    function withdraw() public onlyValidator inState(State.Disputed) callToAction('withdraw') returns (bool){
+    function withdraw()
+        public
+        onlyValidator
+        inState(State.Disputed)
+        callToAction('withdraw')
+        returns (bool)
+    {
 
         emit Finalized(receiver,address(this).balance);
         receiver.transfer(address(this).balance);
@@ -191,7 +192,12 @@ contract Escrow {
     * Refund payout
     * only if minimum defined validators confirmed process
     **/
-    function refund() public onlyValidator inState(State.Disputed) callToAction('refund') returns (bool){
+    function refund()
+        public
+        onlyValidator
+        inState(State.Disputed)
+        callToAction('refund')
+        returns (bool){
 
         emit Finalized(receiver,address(this).balance);
         creator.transfer(address(this).balance);
