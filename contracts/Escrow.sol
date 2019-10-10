@@ -36,12 +36,13 @@ contract Escrow {
     /**
     * Mapping for control limit call based on an action
     **/
-    mapping(string => VoteCount) public voteCountCallMapping;
+    mapping(uint => VoteCount) public voteCountCallMapping;
 
 
     event EscrowLocked();
     event EscrowAborted();
     event Voted(string callToAction);
+    event DisputeRaised();
     event Finalized(address _add, uint _amount);
 
     /**
@@ -52,6 +53,7 @@ contract Escrow {
         payable
     {
             require((_validators.length <= maxValidatorsAllowed) && (_validators.length > 0), "Invalid validator quorum.");
+            require(_minimumVotesRequired % 2 != 0, "Minimum votes should be an odd number to avoid deadlock.");
             require(_minimumVotesRequired <= maxValidatorsAllowed,"Minimum votes required exceeds the total number of validators.");
             require(msg.value > 0, "Fund the account with appropriate amount");
             creator = _creator;
@@ -95,18 +97,26 @@ contract Escrow {
     /**
     * Modifier to identify the call to action and to keep a track of number of votes
     * on each action. Actions can be withdraw or refund.
+    * Code 0 : Represents withdraw action;
+    * Code 1 : Represents refund action;
     */
-    modifier callToAction(string memory _action) {
+    modifier callToAction(uint _code) {
 
-        emit Voted(_action);
+        if(_code == 0) {
+            emit Voted('Withdrawn');
+            require(voteCountCallMapping[1].voter[msg.sender] == false,"Voter has already voted on another action");
+        } else if(_code == 1){
+            emit Voted('Refund');
+            require(voteCountCallMapping[0].voter[msg.sender] == false,"Voter has already voted on another action");
+        }
 
-        require(voteCountCallMapping[_action].voter[msg.sender] == false,"Voter has already voted");
-        if (voteCountCallMapping[_action].totalCall == minimumVotesRequired) {
+        require(voteCountCallMapping[_code].voter[msg.sender] == false,"Voter has already voted");
+        if (voteCountCallMapping[_code].totalCall == minimumVotesRequired - 1) {
             _;
         }
-        //we increment value after, so this is a second call
-        voteCountCallMapping[_action].voter[msg.sender] = true;
-        voteCountCallMapping[_action].totalCall++;
+        /** we increment value after, so this is a second call */
+        voteCountCallMapping[_code].voter[msg.sender] = true;
+        voteCountCallMapping[_code].totalCall++;
     }
 
     /**
@@ -149,11 +159,10 @@ contract Escrow {
     */
     function releasePayment()
         public
-        onlyMembers()
+        onlyCreator()
         inState(State.Locked)
     {
-        //TODO : Improve block.timestamp;
-        require(deadline < block.timestamp, "The Escrow has already expired");
+        // require(deadline < block.timestamp, "The Escrow has already expired");
         emit Finalized(receiver,address(this).balance);
         receiver.transfer(address(this).balance);
         state = State.Inactive;
@@ -170,9 +179,9 @@ contract Escrow {
         onlyMembers()
         inState(State.Locked)
     {
-        //TODO : Improve block.timestamp;
         require(deadline >= block.timestamp, "The Escrow has already expired");
         state = State.Disputed;
+        emit DisputeRaised();
     }
 
     /**
@@ -183,13 +192,13 @@ contract Escrow {
         public
         onlyValidator
         inState(State.Disputed)
-        callToAction('withdraw')
+        callToAction(0)
         returns (bool)
     {
 
         emit Finalized(receiver,address(this).balance);
-        receiver.transfer(address(this).balance);
         state = State.Inactive;
+        receiver.transfer(address(this).balance);
         return true;
 
     }
@@ -202,13 +211,13 @@ contract Escrow {
         public
         onlyValidator
         inState(State.Disputed)
-        callToAction('refund')
+        callToAction(1)
         returns (bool)
     {
 
         emit Finalized(receiver,address(this).balance);
-        creator.transfer(address(this).balance);
         state = State.Inactive;
+        creator.transfer(address(this).balance);
         return true;
     }
     /**

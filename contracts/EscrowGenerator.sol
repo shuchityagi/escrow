@@ -4,17 +4,26 @@ import "./Escrow.sol";
 
 contract EscrowGenerator {
 
+    /** Struct to maintain the basic info in the contract.*/
     struct EscrowStruct {
         address contractAddress;
         address creator;
     }
+
     EscrowStruct[] public escrowContracts;
+    /** Pointer to the last contract depoyed. Helps keep track incase of mass depolyment via scripts */
     address public lastContractAddress;
+    /** Mapping Validator to the list of contracts he/she has been appointed to.*/
     mapping(address => address[]) public validatorMapping;
     
-    event newEscrowContract(address contractAddress);
+    event NewEscrowContract(address contractAddress);
 
-	// deploy a new escrow contract
+	/**
+    * New Escrow
+    * Function to deploy a new independent escrow contract. It can be created by anyone
+    * and for any number of times. The creator is expected to fund it with VET. There is no limit to
+    * the amount of funds.
+    */
 	function newEscrow( address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline)
     	public
     	payable
@@ -30,10 +39,14 @@ contract EscrowGenerator {
         for (uint i = 0; i < _validators.length; i++) {
             validatorMapping[_validators[i]].push(address(c));
         }
-    	emit newEscrowContract(address(c));
+    	emit NewEscrowContract(address(c));
     	return address(c);
 	}
 
+    /**
+    * Get contract count
+    * Utility function to check the number of escrows that exist in the system.
+    */
     function getContractCount()
     	public
     	view
@@ -42,12 +55,4 @@ contract EscrowGenerator {
     	return escrowContracts.length;
 	}
 
-	// function getEscrow(uint id)
-    // 	public
-    // 	view
-    // 	returns (address _contractAddress, address creator)
-    // {
-    //     EscrowStruct memory e = escrowContracts[id];
-    //     return (e.contractAddress, e.creator);
-    // }
 }
