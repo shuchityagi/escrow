@@ -78,9 +78,13 @@ contract Escrow {
 	}
 
     modifier onlyValidator() {
-        //TODO : make the condition right.
-    	require(msg.sender == validators[0], "User not authorised.");
-    	_;
+        for (uint i = 0; i < validators.length; i++) {
+            if(validators[i]==msg.sender){
+                _;
+                return;
+            }
+        }
+        revert("Unauthorized user");
 	}
 
     modifier onlyMembers() {
@@ -97,9 +101,10 @@ contract Escrow {
         emit Voted(_action);
 
         require(voteCountCallMapping[_action].voter[msg.sender] == false,"Voter has already voted");
-        if (voteCountCallMapping[_action].totalCall == minimumVotesRequired) {//we increment value after, so this is a second call
+        if (voteCountCallMapping[_action].totalCall == minimumVotesRequired) {
             _;
         }
+        //we increment value after, so this is a second call
         voteCountCallMapping[_action].voter[msg.sender] = true;
         voteCountCallMapping[_action].totalCall++;
     }
@@ -118,8 +123,8 @@ contract Escrow {
             emit EscrowAborted();
     	    state = State.Inactive;
     	    creator.transfer(address(this).balance);
-        }
-	}
+        } else revert("Incorrect state");
+	} 
 
 
     /**

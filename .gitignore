@@ -1,2 +1,7 @@
+#Node
 .DS_Store
 node_modules
+
+#Buid version
+build/
+!.gitkeep

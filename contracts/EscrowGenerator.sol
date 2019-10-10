@@ -4,13 +4,13 @@ import "./Escrow.sol";
 
 contract EscrowGenerator {
 
-    address[] public contracts;
-	address public lastContractAddress;
-    struct Escrows {
+    struct EscrowStruct {
         address contractAddress;
         address creator;
     }
-    mapping(address => Escrows[]) public validatorMapping;
+    EscrowStruct[] public escrowContracts;
+    address public lastContractAddress;
+    mapping(address => address[]) public validatorMapping;
     
     event newEscrowContract(address contractAddress);
 
@@ -20,9 +20,16 @@ contract EscrowGenerator {
     	payable
     	returns(address newContract)
 	{
+        require((_validators.length > 0), "Invalid validator quorum.");
+        require(_minimumVotesRequired <= _validators.length,"Minimum votes required exceeds the total number of validators.");
+        require(msg.value > 0, "Fund the account with appropriate amount");
     	Escrow c = (new Escrow).value(msg.value)(address(msg.sender), _receiver, _validators, _minimumVotesRequired, _deadline);
-    	contracts.push(address(c));
+    	escrowContracts.push(EscrowStruct(address(c),msg.sender));
     	lastContractAddress = address(c);
+
+        for (uint i = 0; i < _validators.length; i++) {
+            validatorMapping[_validators[i]].push(address(c));
+        }
     	emit newEscrowContract(address(c));
     	return address(c);
 	}
@@ -32,14 +39,15 @@ contract EscrowGenerator {
     	view
     	returns(uint contractCount)
 	{
-    	return contracts.length;
+    	return escrowContracts.length;
 	}
 
-	function getEscrow(uint pos)
-    	public
-    	view
-    	returns(address contractAddress)
-	{
-    	return address(contracts[pos]);
-	}
+	// function getEscrow(uint id)
+    // 	public
+    // 	view
+    // 	returns (address _contractAddress, address creator)
+    // {
+    //     EscrowStruct memory e = escrowContracts[id];
+    //     return (e.contractAddress, e.creator);
+    // }
 }
