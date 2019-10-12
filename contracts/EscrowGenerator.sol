@@ -1,8 +1,9 @@
 pragma solidity ^0.5.11;
 import "./Escrow.sol";
+import "./utils/TokenSupport.sol";
 
 
-contract EscrowGenerator {
+contract EscrowGenerator is TokenSupport{
 
     /** Struct to maintain the basic info in the contract.*/
     struct EscrowStruct {
@@ -10,7 +11,7 @@ contract EscrowGenerator {
         address creator;
     }
 
-    EscrowStruct[] public escrowContracts;
+    EscrowStruct[] private escrowContracts;
     /** Pointer to the last contract depoyed. Helps keep track incase of mass depolyment via scripts */
     address public lastContractAddress;
     /** Mapping Validator to the list of contracts he/she has been appointed to.*/
@@ -18,21 +19,27 @@ contract EscrowGenerator {
     
     event NewEscrowContract(address contractAddress);
 
-	/**
+	constructor()
+        public
+        {
+            owner = msg.sender;
+        }
+    
+    /**
     * New Escrow
     * Function to deploy a new independent escrow contract. It can be created by anyone
     * and for any number of times. The creator is expected to fund it with VET. There is no limit to
     * the amount of funds.
     */
-	function newEscrow( address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline)
+	function newEscrow( address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline, address _tokenAddress)
     	public
-    	payable
     	returns(address newContract)
 	{
         require((_validators.length > 0), "Invalid validator quorum.");
         require(_minimumVotesRequired <= _validators.length,"Minimum votes required exceeds the total number of validators.");
-        require(msg.value > 0, "Fund the account with appropriate amount");
-    	Escrow c = (new Escrow).value(msg.value)(address(msg.sender), _receiver, _validators, _minimumVotesRequired, _deadline);
+        require(_tokenAddress != address(0),"Provide the token address.");
+        require(supportedTokens(address(_tokenAddress)),"The token is not supported.");
+    	Escrow c = (new Escrow)(address(msg.sender), _receiver, _validators, _minimumVotesRequired, _deadline, _tokenAddress);
     	escrowContracts.push(EscrowStruct(address(c),msg.sender));
     	lastContractAddress = address(c);
 

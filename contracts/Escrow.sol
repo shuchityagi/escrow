@@ -1,6 +1,9 @@
 pragma solidity ^0.5.11;
+import "./token/ERC223Receiver.sol";
+import "./utils/TokenSupport.sol";
+import "./token/StandardToken.sol";
 
-contract Escrow {
+contract Escrow is TokenSupport, ERC223Receiver{
 
     /** Address of the creator of the Escrow who is responsible for funding it. */
     address payable public creator;
@@ -16,6 +19,17 @@ contract Escrow {
     uint public minimumVotesRequired;
     /** Maximum number of validators allowed */
     uint private maxValidatorsAllowed = 5;
+    /** The contract address of the VIP180 token */
+    address public tokenAddress;
+    /** Token tkn */
+    Tkn public tkn;
+    /** The token instance */
+    StandardToken tokenInstance;
+    /** Mapping of all transactions that were sent to the contract. */
+    mapping (uint256 => Tkn) public transactions;
+    /** The count of transactions loged in the contract */
+    uint256 public transactionID = 0;
+
     /**
     * The escrow can in the following states
     * 1. Created : Default state when the contract is created.
@@ -44,25 +58,52 @@ contract Escrow {
     event Voted(string callToAction);
     event DisputeRaised();
     event Finalized(address _add, uint _amount);
+    event LogTransaction(address _sender, address _origin, uint _value, bytes _data);
 
     /**
     * Payable constructor to set to state variables.
     */
-    constructor(address payable _creator, address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline)
+    constructor(address payable _creator, address payable _receiver, address[] memory _validators, uint _minimumVotesRequired, uint _deadline, address _tokenAddress)
         public
-        payable
     {
             require((_validators.length <= maxValidatorsAllowed) && (_validators.length > 0), "Invalid validator quorum.");
             require(_minimumVotesRequired % 2 != 0, "Minimum votes should be an odd number to avoid deadlock.");
             require(_minimumVotesRequired <= maxValidatorsAllowed,"Minimum votes required exceeds the total number of validators.");
-            require(msg.value > 0, "Fund the account with appropriate amount");
+            
             creator = _creator;
             validators = _validators;
             receiver = _receiver;
             deadline = _deadline;
-            amountLocked = msg.value;
+            tokenAddress = _tokenAddress;
             minimumVotesRequired = _minimumVotesRequired;
+
+            tokenInstance = StandardToken(tokenAddress);
 	}
+
+    /**@dev tokenFallback function is called by default when tokens are sent at the contract's address and burns them.
+    *  tkn variable is analogue of msg variable of Ether transaction
+    *  @param _sender is the token's address from which the transactions are originating.
+    *  tkn.addr is the token's address from which the transactions are originating.
+    *  @param _value the number of tokens that were sent   (analogue of msg.value)
+    *  @param _data is data of token transaction   (analogue of msg.data)
+    *  tkn.sig is 4 bytes signature of function
+    *  if data of token transaction is a function execution
+    **/
+
+    function tokenFallback(address _sender, uint _value, bytes memory _data)
+        public
+        returns (bool ok)
+    {
+            require(supportsToken(msg.sender),"The token is not supported");
+            require(address(_sender) == address(creator),"Fund the token from the same account.");
+            require(_value > 0, "Fund the account with appropriate amount");
+            // // Problem: This will do a sstore which is expensive gas wise. Find a way to keep it in memory.
+            tkn = Tkn(msg.sender, _sender, _value, _data, getSig(_data));
+            transactions[transactionID] = tkn;
+            amountLocked = _value;
+            emit LogTransaction(msg.sender,_sender,_value,_data);
+            transactionID++;
+    }
 
     modifier inState(State _state) {
     	require(state == _state, "Does not match the required state.");
@@ -134,12 +175,11 @@ contract Escrow {
     	    state = State.Inactive;
     	    creator.transfer(address(this).balance);
         } else revert("Incorrect state");
-	} 
-
+	}
 
     /**
     * Lock escrow
-    *Once the receiver is satisfied with the terms of the escrow,
+    * Once the receiver is satisfied with the terms of the escrow,
     * they can choose to lock it.
     */
     function lockEscrow()
@@ -149,6 +189,21 @@ contract Escrow {
 	{
     	emit EscrowLocked();
     	state = State.Locked;
+	}
+
+    /**
+    * Update escrow
+    * In case a transferFrom was used instead of the ERC223 functions,
+    * the contract will not be able to call the tokenFallback(). To update the metrics of
+    * the escrow, this function should be called after depositing the funds.
+    */
+    function updateEscrow()
+    	public
+        onlyCreator()
+    	inState(State.Created)
+	{
+    	require(tokenInstance.balanceOf(address(this)) > 0, "Please fund the escrow first");
+        amountLocked = tokenInstance.balanceOf(address(this));
 	}
 
 
@@ -162,10 +217,11 @@ contract Escrow {
         onlyCreator()
         inState(State.Locked)
     {
-        // require(deadline < block.timestamp, "The Escrow has already expired");
-        emit Finalized(receiver,address(this).balance);
-        receiver.transfer(address(this).balance);
+        uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance == amountLocked,"Insufficient Balance.");
+        emit Finalized(receiver,_balance);
         state = State.Inactive;
+        tokenInstance.transfer(receiver,_balance);
     }
 
 
@@ -195,10 +251,11 @@ contract Escrow {
         callToAction(0)
         returns (bool)
     {
-
-        emit Finalized(receiver,address(this).balance);
+        uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance == amountLocked,"Insufficient Balance.");
+        emit Finalized(receiver,_balance);
         state = State.Inactive;
-        receiver.transfer(address(this).balance);
+        tokenInstance.transfer(receiver,_balance);
         return true;
 
     }
@@ -215,9 +272,11 @@ contract Escrow {
         returns (bool)
     {
 
-        emit Finalized(receiver,address(this).balance);
+        uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance == amountLocked,"Insufficient Balance.");
+        emit Finalized(receiver,_balance);
         state = State.Inactive;
-        creator.transfer(address(this).balance);
+        tokenInstance.transfer(receiver,_balance);
         return true;
     }
     /**
