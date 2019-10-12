@@ -2,13 +2,6 @@ pragma solidity ^0.5.1;
 import "./../Ownable.sol";
 
 contract TokenSupport is Ownable {
-    struct Tkn {
-        address addr;
-        address sender;
-        uint256 value;
-        bytes data;
-    }
-    Tkn tkn;
     
     // List of all supported tokens
     mapping (address => bool) internal supportedTokens;
@@ -30,14 +23,4 @@ contract TokenSupport is Ownable {
     {
         return supportedTokens[token];
     }
-
-    // function getSig(bytes memory _data)
-    // public
-    // returns (bytes4 sig)
-    // {
-    //     uint l = _data.length < 4 ? _data.length : 4;
-    //     for (uint i = 0; i < l; i++) {
-    //         sig = bytes4(uint(sig) + uint(_data[i]) * (2 ** (8 * (l - 1 - i))));
-    //     }
-    // }
 }

@@ -1,9 +1,9 @@
 pragma solidity ^0.5.1;
 import "./token/ERC223Receiver.sol";
-import "./utils/TokenSupport.sol";
+// import "./utils/TokenSupport.sol";
 import "./token/StandardToken.sol";
 
-contract Escrow is TokenSupport, ERC223Receiver{
+contract Escrow is ERC223Receiver{
 
     /** Address of the creator of the Escrow who is responsible for funding it. */
     address payable public creator;
@@ -21,6 +21,12 @@ contract Escrow is TokenSupport, ERC223Receiver{
     uint private maxValidatorsAllowed = 5;
     /** The contract address of the VIP180 token */
     address public tokenAddress;
+    struct Tkn {
+        address addr;
+        address sender;
+        uint256 value;
+        bytes data;
+    }
     /** Token tkn */
     Tkn public tkn;
     /** The token instance */
@@ -94,7 +100,7 @@ contract Escrow is TokenSupport, ERC223Receiver{
         public
         returns (bool ok)
     {
-            require(supportsToken(msg.sender),"The token is not supported");
+            // require(supportsToken(msg.sender),"The token is not supported");
             require(address(_sender) == address(creator),"Fund the token from the same account.");
             require(_value > 0, "Fund the account with appropriate amount");
             // // Problem: This will do a sstore which is expensive gas wise. Find a way to keep it in memory.
@@ -218,6 +224,7 @@ contract Escrow is TokenSupport, ERC223Receiver{
         inState(State.Locked)
     {
         uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance > 0,"Insufficient Balance");
         require(_balance == amountLocked,"Insufficient Balance.");
         emit Finalized(receiver,_balance);
         state = State.Inactive;
@@ -252,6 +259,7 @@ contract Escrow is TokenSupport, ERC223Receiver{
         returns (bool)
     {
         uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance > 0,"Insufficient Balance");
         require(_balance == amountLocked,"Insufficient Balance.");
         emit Finalized(receiver,_balance);
         state = State.Inactive;
@@ -273,10 +281,11 @@ contract Escrow is TokenSupport, ERC223Receiver{
     {
 
         uint256 _balance = tokenInstance.balanceOf(address(this));
+        require(_balance > 0,"Insufficient Balance");
         require(_balance == amountLocked,"Insufficient Balance.");
-        emit Finalized(receiver,_balance);
+        emit Finalized(creator,_balance);
         state = State.Inactive;
-        tokenInstance.transfer(receiver,_balance);
+        tokenInstance.transfer(creator,_balance);
         return true;
     }
     /**
