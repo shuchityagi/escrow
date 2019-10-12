@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.5.1;
 import "./token/ERC223Receiver.sol";
 import "./utils/TokenSupport.sol";
 import "./token/StandardToken.sol";
@@ -98,7 +98,7 @@ contract Escrow is TokenSupport, ERC223Receiver{
             require(address(_sender) == address(creator),"Fund the token from the same account.");
             require(_value > 0, "Fund the account with appropriate amount");
             // // Problem: This will do a sstore which is expensive gas wise. Find a way to keep it in memory.
-            tkn = Tkn(msg.sender, _sender, _value, _data, getSig(_data));
+            tkn = Tkn(msg.sender, _sender, _value, _data);
             transactions[transactionID] = tkn;
             amountLocked = _value;
             emit LogTransaction(msg.sender,_sender,_value,_data);

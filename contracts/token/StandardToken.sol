@@ -4,8 +4,9 @@ import "./VIP180.sol";
 import "./IERC223.sol";
 import "./ERC223Receiver.sol";
 import "./../utils/Address.sol";
+import "./../Ownable.sol";
 
-contract StandardToken is VIP180, IERC223 {
+contract StandardToken is VIP180, IERC223, Ownable {
 
     using SafeMath for uint;
 
@@ -17,6 +18,17 @@ contract StandardToken is VIP180, IERC223 {
     mapping (address => uint256) internal balances;
     mapping (address => mapping (address => uint256)) internal allowed;
     event Burn(address indexed burner, uint256 value);
+
+    constructor(string memory tokenName, string memory tokenSymbol, uint8 tokenDecimals, uint256 tokenTotalSupply)
+    public
+    {
+        _owner = msg.sender;
+        _symbol = tokenSymbol;
+        _name = tokenName;
+        _decimals = tokenDecimals;
+        _totalSupply = tokenTotalSupply;
+        balances[msg.sender] = _totalSupply;
+    }
 
     function name()
         public

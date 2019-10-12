@@ -1,5 +1,5 @@
 //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/drafts/Counters.sol
-pragma solidity ^0.5.0;
+pragma solidity ^0.5.1;
 
 import "../math/SafeMath.sol";
 

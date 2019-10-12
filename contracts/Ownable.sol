@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.5.1;
 
 import "./utils/Context.sol";
 /**
@@ -11,7 +11,7 @@ import "./utils/Context.sol";
  * the owner.
  */
 contract Ownable is Context {
-    address private _owner;
+    address public _owner;
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 

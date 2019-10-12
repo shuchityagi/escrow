@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.5.1;
 import "./../Ownable.sol";
 
 contract TokenSupport is Ownable {
@@ -7,7 +7,6 @@ contract TokenSupport is Ownable {
         address sender;
         uint256 value;
         bytes data;
-        bytes4 sig;
     }
     Tkn tkn;
     
@@ -32,13 +31,13 @@ contract TokenSupport is Ownable {
         return supportedTokens[token];
     }
 
-    function getSig(bytes memory _data)
-    public
-    returns (bytes4 sig)
-    {
-        uint l = _data.length < 4 ? _data.length : 4;
-        for (uint i = 0; i < l; i++) {
-            sig = bytes4(uint(sig) + uint(_data[i]) * (2 ** (8 * (l - 1 - i))));
-        }
-    }
+    // function getSig(bytes memory _data)
+    // public
+    // returns (bytes4 sig)
+    // {
+    //     uint l = _data.length < 4 ? _data.length : 4;
+    //     for (uint i = 0; i < l; i++) {
+    //         sig = bytes4(uint(sig) + uint(_data[i]) * (2 ** (8 * (l - 1 - i))));
+    //     }
+    // }
 }

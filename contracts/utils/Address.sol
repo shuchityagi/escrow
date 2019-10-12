@@ -1,6 +1,6 @@
 //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Address.sol
 
-pragma solidity ^0.5.5;
+pragma solidity ^0.5.1;
 
 /**
  * @dev Collection of functions related to the address type

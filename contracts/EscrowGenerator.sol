@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity ^0.5.1;
 import "./Escrow.sol";
 import "./utils/TokenSupport.sol";
 
@@ -22,7 +22,7 @@ contract EscrowGenerator is TokenSupport{
 	constructor()
         public
         {
-            owner = msg.sender;
+            _owner = msg.sender;
         }
     
     /**
@@ -38,7 +38,7 @@ contract EscrowGenerator is TokenSupport{
         require((_validators.length > 0), "Invalid validator quorum.");
         require(_minimumVotesRequired <= _validators.length,"Minimum votes required exceeds the total number of validators.");
         require(_tokenAddress != address(0),"Provide the token address.");
-        require(supportedTokens(address(_tokenAddress)),"The token is not supported.");
+        require(supportsToken(_tokenAddress),"The token is not supported.");
     	Escrow c = (new Escrow)(address(msg.sender), _receiver, _validators, _minimumVotesRequired, _deadline, _tokenAddress);
     	escrowContracts.push(EscrowStruct(address(c),msg.sender));
     	lastContractAddress = address(c);
