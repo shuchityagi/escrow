@@ -4,7 +4,7 @@ The contact follows a decentralized structure for every Escrow. The Master Escro
 
 The address of these escrows is returned to the user so that they can act independently use it, without affecting the other escrows in place. This compartmentalized structure offers more privacy to users.
 
-ERC223 token standard is specifically used in this scenario because it provides mechanism to control the transfer of tokens into the escrow while still maintaining bacward compatibility with the popular VIP180/ERC20 token standards.
+ERC223 token standard is specifically used in this scenario because it provides mechanism to control the transfer of tokens into the escrow while still maintaining backward compatibility with the popular VIP180/ERC20 token standards.
 
 ## Flow of execution :
 - **Deploy StandardToken.sol**
