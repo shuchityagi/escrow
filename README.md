@@ -6,6 +6,36 @@ The address of these escrows is returned to the user so that they can act indepe
 
 ERC223 token standard is specifically used in this scenario because it provides mechanism to control the transfer of tokens into the escrow while still maintaining backward compatibility with the popular VIP180/ERC20 token standards.
 
+## Installation
+Clone the repository and cd into it
+```
+git clone https://github.com/shuchityagi/escrow.git
+cd escrow
+```
+### Running with docker
+
+Make sure you have docker installed. You can install it from [here](https://docs.docker.com/).
+once installed, run :
+```
+docker build -t escrow .
+docker run --rm escrow
+```
+These commands will build a new docker instance and compile the truffle contracts.
+
+### Running without docker
+
+**Prerequisites**
+1. Node(10^) and NPM (6^)
+2. Truffle
+
+Now to compile the contracts run,
+```
+truffle build
+```
+or
+```
+truffle compile
+```
 ## Flow of execution :
 - **Deploy StandardToken.sol**
 
