@@ -42,6 +42,9 @@ truffle compile
 ```
 
 ## Flow of execution :
+```
+*Please note : Deploying a contract may require more gas. Please supply double the gas amount while deploying.*
+```
 - **Deploy StandardToken.sol**
 
 >The account used for deploying will be the owner of the token contract and will hold the total supply.
