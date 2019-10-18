@@ -1,11 +1,11 @@
 {
-    "name": "multiparty-escrow",
+    "name": "escrow",
     "version": "0.0.1",
     "description": "Escrow with multiple validators",
     "main": "truffle.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/shuchityagi/multipart_escrow.git"
+        "url": "https://github.com/shuchityagi/escrow.git"
     },
     "keywords": [
         "solidity",
@@ -17,24 +17,6 @@
         "vip180"
     ],
     "dependencies": {
-        "babel-polyfill": "^7.4.0",
-        "chai": "^4.2.0",
-        "truffle-hdwallet-provider": "0.0.3"
-    },
-    "devDependencies": {
-        "babel-preset-es2015": "^6.18.0",
-        "babel-preset-stage-2": "^7.0.0",
-        "babel-preset-stage-3": "^7.0.0",
-        "babel-register": "^6.23.0",
-        "big-number": "^0.4.0",
-        "coveralls": "^2.13.1",
-        "ethereumjs-testrpc": "^6.0.3",
-        "mocha-lcov-reporter": "^1.3.0",
-        "sol-merger": "^1.0.1",
-        "solidity-coverage": "^0.6.5",
-        "truffle": "5.0.40"
-    },
-    "scripts": {
-        "build-contracts": "sol-merger \"./contracts/*.sol\" ./build"
+        "truffle": "5.0.41"
     }
 }
