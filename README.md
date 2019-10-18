@@ -25,10 +25,14 @@ These commands will build a new docker instance and compile the truffle contract
 ### Running without docker
 
 **Prerequisites**
-1. Node(10^) and NPM (6^)
-2. Truffle
+1. Node(10^) and NPM (6.9.0)
+2. Truffle (5.0.39^)
 
-Now to compile the contracts run,
+Install the packages
+```
+npm install
+```
+Now to compile the contracts, run
 ```
 truffle build
 ```
@@ -36,6 +40,7 @@ or
 ```
 truffle compile
 ```
+
 ## Flow of execution :
 - **Deploy StandardToken.sol**
 
