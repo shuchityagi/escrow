@@ -62,7 +62,13 @@ truffle compile
 
 - Take the address from the previous function and using the ABI, set it up for interaction.
 
-- The escrow creator is expected to fund the contracts with appropriate token.
+- The escrow creator is expected to fund the contracts with appropriate token. He can do so by just sending the tokens to the Escrow address directly (without calling any other function).
+
+- The escrow can in the following states
+   1. CREATED: Default state when the contract is created.
+   2. LOCKED: Once the receiver is satisfied with the terms of the escrow, they can choose to lock it.
+   3. INACTIVE: The escrow is rendered inactive once the funds are moved out of it (refund or withdraw).
+   4. DISPUTED: In case of a dispute, either of the party can choose to move the escrow in this state to let the validators in
 
 - From the receiver account, lock the escrow using **lockEscrow()**
 
@@ -74,6 +80,12 @@ truffle compile
 
 - Call **raiseDispute()**
 
->This can be called by the creator or the receiver **before the deadline for the contract expires** to block the escrow and get the validators involved.
+>This can be called by the creator or the receiver **before the deadline for the contract expires** to block the escrow and get the validators involved. From there on, the concept of deadline is completely breached and the funds are only controlled by the validators.
 
 - Validators can then choose to **withdraw()** the payment to receiver's account or **refund()** it back to the creator. Each validator can vote once. And once the minimum decorum of votes is reached, the contract transfers the funds to the elected benefieciary.
+
+- **abortEscrow()** can only be called by the creator under two circumstances :
+  1. The contract is still under the CREATED state. Hasn't been locked yet.
+  2. The contract has reached the deadline and no disputes were raised.
+  
+- **updateEscrow()** is called in case a transferFrom was used instead of the ERC223 transfer function to fund the escrow. In such case, the contract will not be able to call the tokenFallback(). To update the metrics of the escrow, this function should be called by te creator after depositing the funds.
