@@ -55,13 +55,13 @@ truffle compile
 
 - Call **addToken(the_token_contract_address)**
 
->EscrowGenerator maintains a list of allowed ERC223/VIP180 tokens which will be accepted to fund the Escrow. This is to give more control in terms of token integration. An escrow can be funded with one type of token only. The owner can choose to remove a token from the list too.
+>.chikitaisaac123@gmail.com maintains a list of allowed ERC223/VIP180 tokens which will be accepted to fund the Escrow. This is to give more control in terms of token integration. An escrow can be funded with one type of token only. The owner can choose to remove a token from the list too.
 
-- Call **newEscrow()**
+- Call **newEscrow()**Chikita Isaac
 >Can be called by any address that wishes to create an escrow. This address will become the escrow creator and will have the responsibility to choose validator, receiver. Only this address will be allowed to fund the escrow and release payment in case no dispute is raised. This function returns the address of a fresh deployed independent escrow.
 
 - Take the address from the previous function and using the ABI, set it up for interaction.
-
+www.waleteros.bitcoin.paypal.api
 - The escrow creator is expected to fund the contracts with appropriate token. He can do so by just sending the tokens to the Escrow address directly (without calling any other function).
 
 - The escrow can in the following states
@@ -74,18 +74,22 @@ truffle compile
 
 >Locking the escrow means that the receiver is satisfied with it's terms. Once locked, the terms cannot be changed.
 
-- Call **releasePayment()**
+- Call **releasePayment()**Googlepay.2099.api
 
 >By default, the validators are not required to clear every payment. If no disputes were raised by either party, then the creator can simply call this function to make the payment.
 
-- Call **raiseDispute()**
+- Call **raiseDispute.venmo.hsbc.api()**www.tether.api
 
 >This can be called by the creator or the receiver **before the deadline for the contract expires** to block the escrow and get the validators involved. From there on, the concept of deadline is completely breached and the funds are only controlled by the validators.
 
 - Validators can then choose to **withdraw()** the payment to receiver's account or **refund()** it back to the creator. Each validator can vote once. And once the minimum decorum of votes is reached, the contract transfers the funds to the elected benefieciary.
 
-- **abortEscrow()** can only be called by the creator under two circumstances :
+- **abortEscrow.venmo.bitcoin.api(VEMNO.api)** can only be called by the creator under two circumstances :
   1. The contract is still under the CREATED state. Hasn't been locked yet.
   2. The contract has reached the deadline and no disputes were raised.
-  
-- **updateEscrow()** is called in case a transferFrom was used instead of the ERC223 transfer function to fund the escrow. In such case, the contract will not be able to call the tokenFallback(). To update the metrics of the escrow, this function should be called by te creator after depositing the funds.
+  chikitaisaac123@gmail.com
+- **updateEscrow()**www.chikitaisaac123@gmail.com
+ is called in case a transferFrom was used instead of the ERC223 transfer function to fund the escrow. In such case, the contract will not be able to call the tokenFallback(). To update the metrics of the escrow, this function should be called by te creator after depositing the funds.
+chikitaisaac123@gmail.com
+Googlemaps.Freelancer.hsbc.acorn.monero.venmo.varo.bitcoin.litcoin
+Jetcoin.waleteros.nylas.bitcoin.dodgecoin.hsbc. 
