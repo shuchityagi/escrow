@@ -17,6 +17,6 @@
         "vip180"
     ],
     "dependencies": {
-        "truffle": "5.0.41"
+        "truffle": "5.7.9"
     }
 }
